@@ -1,0 +1,113 @@
+---
+import courses from '../data/courses.json';
+import '../styles/global.css';
+const topics = [...new Set(courses.map(c => c.topic))];
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const canonical = new URL(`${base}/`, Astro.site);
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Learning Library | JC Choi</title>
+  <meta name="description" content="Practical developer learning by JC Choi. Explore narrated guides and interactive labs on Astro, Next.js, and Webflow Cloud." />
+  <link rel="canonical" href={canonical} /><link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+  <meta name="theme-color" content="#17191e" />
+</head>
+<body>
+  <a class="skip" href="#library">Skip to the library</a>
+  <header class="header wrap">
+    <a class="brand" href={`${base}/`} aria-label="The Learning Library home"><span class="mark" aria-hidden="true">ll</span><span>JC CHOI<span class="brand-sub">THE LEARNING LIBRARY</span></span></a>
+    <nav aria-label="Main navigation"><a class="nav-active" href="#library">Library</a><a href="https://github.com/jcpopdigitalpartners" target="_blank" rel="noopener noreferrer">GitHub <span class="external" aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a></nav>
+  </header>
+  <main class="wrap">
+    <section class="intro" aria-labelledby="title">
+      <div><p class="eyebrow"><span aria-hidden="true">//</span> FOR THE CURIOUS BUILDER</p><h1 id="title">Less watching.<br /><span>More figuring it out.</span></h1><p class="intro-copy">A small library of practical learning experiences.<br class="desktop-break" /> Listen, explore, and put an idea to work.</p></div>
+      <aside class="intro-note"><span class="note-index">01 — THE APPROACH</span><p>Learning should give you<br />something to <em>do.</em></p><span class="note-small">Guides with a voice. Labs with a purpose.</span></aside>
+    </section>
+    <section id="library" aria-labelledby="library-title">
+      <div class="library-top"><div><p class="eyebrow muted">THE COLLECTION</p><h2 id="library-title">Pick your next learning object</h2></div><span class="total">{String(courses.length).padStart(2,'0')} experiences</span></div>
+      <form class="toolbar" role="search" onsubmit="return false">
+        <div class="filters" aria-label="Filter by topic"><button type="button" class="filter active" data-topic="All" aria-pressed="true">All topics</button>{topics.map(topic => <button type="button" class="filter" data-topic={topic} aria-pressed="false">{topic}</button>)}</div>
+        <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Search learning objects</span><input id="search" type="search" placeholder="Find something to learn" autocomplete="off" /></label>
+      </form>
+      <p id="results" class="results" aria-live="polite">Showing all {courses.length} experiences</p>
+      <div class="cards">
+        {courses.map((course, index) => <article class="course" data-topic={course.topic} data-search={[course.title, course.description, course.topic, course.format, course.outcome].join(' ').toLowerCase()}>
+          <div class={`cover ${course.visual}`} aria-hidden="true"><span class="cover-id">LEARNING OBJECT / {String(index+1).padStart(2,'0')}</span>
+            {course.visual === 'frameworks' && <div class="framework-visual"><span>Astro<span class="framework-small">content & islands</span></span><span class="versus">/</span><span>Next.js<span class="framework-small">connected workflows</span></span></div>}
+            {course.visual === 'boundary' && <div class="boundary-visual"><div class="page-block"><span>CONTENT</span><div class="island-block">INTERACTIVITY</div><span class="boundary-label">one deliberate boundary</span></div></div>}
+            {course.visual === 'cloud' && <div class="cloud-visual"><div><span class="cloud-label">THE SITE</span><strong>Designer</strong></div><span class="connector">+</span><div><span class="cloud-label">THE APP</span><strong>Your IDE</strong></div></div>}
+            <span class="cover-bottom">{course.topic.toUpperCase()}<span>{course.format === 'Narrated guide' ? 'AUDIO + EXPLORATION' : 'HANDS-ON'}</span></span>
+          </div>
+          <div class="card-content"><div class="metadata"><span class="format">{course.format}</span><span>{course.level}</span></div><h3><a href={course.url} target="_blank" rel="noopener noreferrer">{course.title}<span class="sr-only"> (opens in a new tab)</span></a></h3><p class="description">{course.description}</p><p class="outcome"><span>TAKE AWAY</span>{course.outcome}</p><div class="card-footer"><a class="open-course" href={course.url} target="_blank" rel="noopener noreferrer">Open {course.format === 'Interactive lab' ? 'lab' : 'guide'}<span class="sr-only"> (opens in a new tab)</span></a><a class="source" href={course.repository} target="_blank" rel="noopener noreferrer" aria-label={`Source for ${course.title} (opens in a new tab)`}>Source</a></div></div>
+        </article>)}
+      </div>
+      <div class="empty" hidden><h3>No matches this time</h3><p>Try a different topic or a shorter search.</p><button type="button" id="reset">Clear filters</button></div>
+    </section>
+    <footer><p><strong>Made for learning by doing.</strong><span>Created by JC Choi</span></p><a href="https://github.com/jcpopdigitalpartners" target="_blank" rel="noopener noreferrer">Explore the work on GitHub<span class="sr-only"> (opens in a new tab)</span></a></footer>
+  </main>
+  <div id="course-wipe" aria-hidden="true" hidden></div>
+  <script>
+    const input = document.querySelector<HTMLInputElement>('#search')!;
+    const filters = [...document.querySelectorAll<HTMLButtonElement>('.filter')];
+    const cards = [...document.querySelectorAll<HTMLElement>('.course')];
+    const empty = document.querySelector<HTMLElement>('.empty')!;
+    const results = document.querySelector<HTMLElement>('#results')!;
+    let topic = 'All';
+    function update() {
+      const query = input.value.trim().toLowerCase();
+      let count = 0;
+      cards.forEach(card => { const visible = (topic === 'All' || card.dataset.topic === topic) && card.dataset.search!.includes(query); card.hidden = !visible; if (visible) count++; });
+      empty.hidden = count > 0;
+      results.textContent = `Showing ${count} of ${cards.length} experience${cards.length === 1 ? '' : 's'}`;
+      filters.forEach(button => { const active = button.dataset.topic === topic; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active)); });
+    }
+    filters.forEach(button => button.addEventListener('click', () => { topic = button.dataset.topic!; update(); }));
+    input.addEventListener('input', update);
+    document.querySelector('#reset')!.addEventListener('click', () => { topic = 'All'; input.value = ''; update(); input.focus(); });
+
+    // Real links remain usable without JavaScript and for modified clicks.
+    const wipe = document.querySelector<HTMLElement>('#course-wipe')!;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let leaving = false;
+    let navigationTimer: ReturnType<typeof setTimeout> | undefined;
+    document.querySelectorAll<HTMLAnchorElement>('.course h3 a, .open-course').forEach(link => {
+      link.removeAttribute('target');
+      link.removeAttribute('rel');
+      link.querySelector('.sr-only')?.remove();
+      link.addEventListener('click', event => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || reducedMotion.matches) return;
+        event.preventDefault();
+        if (leaving) return;
+        leaving = true;
+        const columns = Math.ceil(window.innerWidth / 64);
+        const rows = Math.ceil(window.innerHeight / 64);
+        wipe.style.setProperty('--columns', String(columns));
+        wipe.style.setProperty('--rows', String(rows));
+        const pixels = document.createDocumentFragment();
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < columns; x++) {
+            const pixel = document.createElement('span');
+            // A diagonal sweep with staggered edges, rather than a uniform fade.
+            const progress = (x + y) / Math.max(1, columns + rows - 2);
+            const stagger = ((x * 7 + y * 11) % 5) * 12;
+            pixel.style.setProperty('--delay', `${Math.round(progress * 440 + stagger)}ms`);
+            pixels.append(pixel);
+          }
+        }
+        wipe.replaceChildren(pixels);
+        wipe.hidden = false;
+        navigationTimer = setTimeout(() => window.location.assign(link.href), 720);
+      });
+    });
+    // Back restores the library from the browser cache with no covered screen.
+    window.addEventListener('pageshow', () => {
+      clearTimeout(navigationTimer);
+      leaving = false;
+      wipe.hidden = true;
+      wipe.replaceChildren();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "developer-guide",
+    "title": "Astro or Next.js? Make the call",
+    "description": "Explore framework boundaries, architecture defaults, and five decisions that shape a web application.",
+    "topic": "Architecture",
+    "format": "Narrated guide",
+    "level": "Intermediate",
+    "url": "https://jcpopdigitalpartners.github.io/developer-guide/",
+    "repository": "https://github.com/jcpopdigitalpartners/developer-guide",
+    "outcome": "Choose a framework around the experience you need to build.",
+    "visual": "frameworks"
+  },
+  {
+    "id": "astro-feature",
+    "title": "Build an Astro feature boundary",
+    "description": "Get hands-on with the boundary between a content-driven page and an interactive feature.",
+    "topic": "Astro",
+    "format": "Interactive lab",
+    "level": "Intermediate",
+    "url": "https://jcpopdigitalpartners.github.io/astro-feature/",
+    "repository": "https://github.com/jcpopdigitalpartners/astro-feature",
+    "outcome": "Explore where interactivity belongs in an Astro page.",
+    "visual": "boundary"
+  },
+  {
+    "id": "webflow-cloud",
+    "title": "When to use Webflow Cloud",
+    "description": "Follow a narrated walkthrough of deployment choices and the relationship between a Webflow site and its app.",
+    "topic": "Webflow Cloud",
+    "format": "Narrated guide",
+    "level": "Intermediate",
+    "url": "https://jcpopdigitalpartners.github.io/webflow-cloud-audio-guide/",
+    "repository": "https://github.com/jcpopdigitalpartners/webflow-cloud-audio-guide",
+    "outcome": "Decide when an app belongs alongside a Webflow-managed site.",
+    "visual": "cloud"
+  }
+]
